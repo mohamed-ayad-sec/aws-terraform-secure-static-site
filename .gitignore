@@ -1,0 +1,16 @@
+# Dossier de travail de Terraform (contient les binaires des providers)
+.terraform/
+
+# Fichiers d'état (VITAL : ils contiennent parfois des secrets en clair)
+*.tfstate
+*.tfstate.*
+
+# Fichiers de variables sensibles (si tu en crées)
+*.tfvars
+*.tfvars.json
+
+# Fichiers de log
+*.log
+
+# Fichier de lock HCL (optionnel de l'ignorer, mais conseillé au début)
+.terraform.lock.hcl
