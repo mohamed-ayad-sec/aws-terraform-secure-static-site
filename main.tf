@@ -16,13 +16,13 @@ resource "aws_s3_bucket" "static_site" {
   # checkov:skip=CKV2_AWS_6: "Public access block activé via ressource séparée"
   # checkov:skip=CKV2_AWS_61: "Lifecycle activé via ressource séparée"
   # checkov:skip=CKV2_AWS_62: "Notifications non requises"
-  
+
   bucket = "${var.project_name}-${var.environment}-${random_id.bucket_suffix.hex}"
   tags   = var.common_tags
 }
 
 resource "aws_s3_bucket_public_access_block" "static_site_block" {
-  bucket = aws_s3_bucket.static_site.id
+  bucket                  = aws_s3_bucket.static_site.id
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -77,7 +77,7 @@ resource "aws_s3_bucket" "logs" {
 }
 
 resource "aws_s3_bucket_public_access_block" "logs_block" {
-  bucket = aws_s3_bucket.logs.id
+  bucket                  = aws_s3_bucket.logs.id
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
