@@ -1,0 +1,57 @@
+name: "Terraform DevSecOps Pipeline"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    name: "Terraform Build & Scan"
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: "eu-west-3"
+
+    steps:
+      # 1. Checkout du code
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      # 2. Installation de Terraform
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      # 3. Vérification du formatage (Linter)
+      - name: Terraform Format
+        run: terraform fmt -check
+
+      # 4. Initialisation (Téléchargement des providers)
+      - name: Terraform Init
+        run: terraform init
+
+      # 5. SCAN DE SÉCURITÉ (Le cœur du DevSecOps)
+      # On installe Checkov et on scanne le code. 
+      # Si Checkov trouve une erreur non-skipée, il arrête la pipeline ici.
+      - name: Checkov Security Scan
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: .
+          framework: terraform
+          # On ne veut pas que la pipeline échoue si on a des skips documentés
+          soft_fail: false 
+          log_level: DEBUG
+
+      # 6. Terraform Plan
+      - name: Terraform Plan
+        run: terraform plan -input=false
+
+      # 7. Terraform Apply (Seulement sur push sur la branche main)
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve -input=false
